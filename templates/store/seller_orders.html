@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Orders - ShopKart{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Seller Orders</h1>
+
+{% if order_items %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Amount</th>
+            <th>Buyer</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order_items %}
+            <tr>
+                <td>#{{ item.order.id }}</td>
+                <td>{{ item.order.created_at|date:'M d, Y H:i' }}</td>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>$ {{ item.subtotal }}</td>
+                <td>{{ item.order.user.username }}</td>
+                <td>{{ item.order.get_status_display }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No orders yet for your products.</p>
+{% endif %}
+{% endblock %}

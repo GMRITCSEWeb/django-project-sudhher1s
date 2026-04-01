@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmation - ShopKart{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Order Confirmed</h1>
+<p>Thank you, {{ order.full_name }}. Your order #{{ order.id }} has been placed.</p>
+<p>Status: {{ order.get_status_display }}</p>
+<p>Total: $ {{ order.total_amount }}</p>
+
+<h2>Items</h2>
+<ul>
+    {% for item in order.items.all %}
+        <li>{{ item.product.name }} x {{ item.quantity }} = $ {{ item.subtotal }}</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'product_list' %}">Continue shopping</a>
+{% endblock %}

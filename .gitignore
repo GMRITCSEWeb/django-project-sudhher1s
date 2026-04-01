@@ -1,0 +1,19 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Django local runtime files
+db.sqlite3
+media/
+
+# Local helper outputs
+.tmp_tree.txt
+pdf_full_text.txt
+pdf_requirement_candidates.txt
+
+# IDE metadata
+.vscode/

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - ShopKart{% endblock %}
+
+{% block content %}
+<article class="product-detail">
+    {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="detail-image">
+    {% endif %}
+    <div>
+        <h1>{{ product.name }}</h1>
+        <p class="muted">Category: <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></p>
+        <p class="muted">Sold by: {{ product.seller.username|default:'Campus Seller' }}</p>
+        <p>{{ product.description }}</p>
+        <p class="price">$ <span id="live-price">{{ product.price }}</span></p>
+        <p class="muted">Stock: <span id="live-stock">{{ product.stock }}</span></p>
+
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'add_to_cart' product.slug %}">
+            {% csrf_token %}
+            {{ add_to_cart_form.quantity.label_tag }}
+            {{ add_to_cart_form.quantity }}
+            <button type="submit">Add to Cart</button>
+        </form>
+        {% else %}
+            <p><a href="{% url 'login' %}">Login</a> to add this product to cart.</p>
+        {% endif %}
+    </div>
+</article>
+
+<script>
+    (function () {
+        const priceNode = document.getElementById("live-price");
+        const stockNode = document.getElementById("live-stock");
+        if (!priceNode || !stockNode) {
+            return;
+        }
+
+        const endpoint = "{% url 'product_status_api' product.slug %}";
+        const refresh = async () => {
+            try {
+                const response = await fetch(endpoint, {headers: {"X-Requested-With": "XMLHttpRequest"}});
+                if (!response.ok) {
+                    return;
+                }
+                const data = await response.json();
+                priceNode.textContent = data.price;
+                stockNode.textContent = data.stock;
+            } catch (error) {
+                console.debug("Live product update skipped", error);
+            }
+        };
+
+        setInterval(refresh, 15000);
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - ShopKart{% endblock %}
+
+{% block content %}
+<h1 class="page-title">My Orders</h1>
+
+{% if orders %}
+    {% for order in orders %}
+        <article class="card order-card">
+            <h3>Order #{{ order.id }}</h3>
+            <p class="muted">Placed on {{ order.created_at|date:'M d, Y H:i' }}</p>
+            <p>Status: <strong>{{ order.get_status_display }}</strong></p>
+            <p>Total: <strong>$ {{ order.total_amount }}</strong></p>
+            <ul>
+                {% for item in order.items.all %}
+                    <li>{{ item.product.name }} x {{ item.quantity }} = $ {{ item.subtotal }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+    {% endfor %}
+{% else %}
+    <p>You have not placed any orders yet.</p>
+{% endif %}
+{% endblock %}

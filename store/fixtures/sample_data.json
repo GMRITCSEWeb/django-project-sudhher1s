@@ -1,0 +1,48 @@
+[
+    {
+        "model": "store.category",
+        "pk": 1,
+        "fields": {
+            "name": "Electronics",
+            "slug": "electronics",
+            "parent": null
+        }
+    },
+    {
+        "model": "store.category",
+        "pk": 2,
+        "fields": {
+            "name": "Phones",
+            "slug": "phones",
+            "parent": 1
+        }
+    },
+    {
+        "model": "store.product",
+        "pk": 1,
+        "fields": {
+            "name": "Budget Phone X",
+            "slug": "budget-phone-x",
+            "description": "Affordable smartphone with solid battery life.",
+            "price": "299.99",
+            "stock": 25,
+            "category": 2,
+            "image": "",
+            "created_at": "2026-01-01T10:00:00"
+        }
+    },
+    {
+        "model": "store.product",
+        "pk": 2,
+        "fields": {
+            "name": "Wireless Earbuds Lite",
+            "slug": "wireless-earbuds-lite",
+            "description": "Compact earbuds with noise isolation.",
+            "price": "79.99",
+            "stock": 40,
+            "category": 1,
+            "image": "",
+            "created_at": "2026-01-05T10:00:00"
+        }
+    }
+]

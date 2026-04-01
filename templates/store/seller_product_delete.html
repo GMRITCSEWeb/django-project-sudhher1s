@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Product - ShopKart{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Delete Product</h1>
+<article class="card">
+    <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+        <a href="{% url 'seller_dashboard' %}">Cancel</a>
+    </form>
+</article>
+{% endblock %}

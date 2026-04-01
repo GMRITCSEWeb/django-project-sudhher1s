@@ -1,0 +1,10 @@
+<article class="product-card" data-product-slug="{{ product.slug }}">
+    {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+    {% endif %}
+    <h3><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
+    <p class="muted">{{ product.category.name }}</p>
+    <p class="muted">Seller: {{ product.seller.username|default:'Campus Seller' }}</p>
+    <p class="price">$ <span class="live-price">{{ product.price }}</span></p>
+    <p class="muted">Stock: <span class="live-stock">{{ product.stock }}</span></p>
+</article>
