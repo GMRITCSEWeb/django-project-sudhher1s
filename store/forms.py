@@ -68,4 +68,4 @@ class ProfileForm(forms.ModelForm):
 class SellerProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ("name", "description", "price", "stock", "category", "image", "is_active")
+        fields = ("name", "description", "product_type", "price", "stock", "category", "image", "is_active")

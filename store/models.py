@@ -40,9 +40,24 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+	TYPE_CODE = "code"
+	TYPE_PAPER = "paper"
+	TYPE_PROJECT = "project"
+	TYPE_INTERNSHIP = "internship"
+	TYPE_OTHER = "other"
+
+	TYPE_CHOICES = [
+		(TYPE_CODE, "Code"),
+		(TYPE_PAPER, "Papers"),
+		(TYPE_PROJECT, "Projects"),
+		(TYPE_INTERNSHIP, "Internships"),
+		(TYPE_OTHER, "Other Academic Resource"),
+	]
+
 	name = models.CharField(max_length=180)
 	slug = models.SlugField(max_length=200, unique=True, blank=True)
 	description = models.TextField()
+	product_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=TYPE_CODE)
 	price = models.DecimalField(max_digits=10, decimal_places=2)
 	stock = models.PositiveIntegerField(default=0)
 	category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")

@@ -45,6 +45,7 @@ class BasicTests(TestCase):
         payload = {
             "name": "Campus Keyboard",
             "description": "Mechanical keyboard",
+            "product_type": "code",
             "price": "49.99",
             "stock": 7,
             "category": self.category.id,

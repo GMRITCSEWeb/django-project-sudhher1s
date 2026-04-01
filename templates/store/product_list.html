@@ -1,58 +1,125 @@
 {% extends 'base.html' %}
 
-{% block title %}Products - ShopKart{% endblock %}
+{% block title %}Products - CodeMart{% endblock %}
 
 {% block content %}
-<h1 class="page-title">Products</h1>
+<div id="react-storefront"></div>
 
-{% if categories %}
-<div class="chip-row">
-    <a class="chip {% if not active_category %}active{% endif %}" href="{% url 'product_list' %}">All</a>
-    {% for category in categories %}
-        <a class="chip {% if active_category and active_category.id == category.id %}active{% endif %}" href="{{ category.get_absolute_url }}">{{ category.name }}</a>
-    {% endfor %}
-</div>
-{% endif %}
+<noscript>
+    <h1 class="page-title">Products</h1>
+    <div class="product-grid">
+        {% for product in products %}
+            {% include 'store/components/product_card.html' with product=product %}
+        {% empty %}
+            <p>No products found.</p>
+        {% endfor %}
+    </div>
+    {% include 'store/components/pagination.html' %}
+</noscript>
 
-<div class="product-grid">
-    {% for product in products %}
-        {% include 'store/components/product_card.html' with product=product %}
-    {% empty %}
-        <p>No products found.</p>
-    {% endfor %}
-</div>
+{{ react_products|json_script:"products-data" }}
+{{ search_query|default:''|json_script:"search-query-data" }}
 
-{% include 'store/components/pagination.html' %}
+<script>
+    window.codeMartCategories = [
+        { name: "All", url: "{% url 'product_list' %}" },
+        {% for category in categories %}
+            { name: "{{ category.name|escapejs }}", url: "{{ category.get_absolute_url }}" },
+        {% endfor %}
+    ];
+</script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
 <script>
     (function () {
-        const cards = document.querySelectorAll("[data-product-slug]");
-        if (!cards.length) {
+        const rootNode = document.getElementById("react-storefront");
+        if (!rootNode || !window.React || !window.ReactDOM) {
             return;
         }
 
-        const refreshCard = async (card) => {
-            const slug = card.dataset.productSlug;
-            const priceNode = card.querySelector(".live-price");
-            const stockNode = card.querySelector(".live-stock");
-            if (!slug || !priceNode || !stockNode) {
-                return;
-            }
-            try {
-                const response = await fetch(`/api/products/${slug}/status/`, {headers: {"X-Requested-With": "XMLHttpRequest"}});
-                if (!response.ok) {
+        const products = JSON.parse(document.getElementById("products-data").textContent || "[]");
+        const searchQuery = JSON.parse(document.getElementById("search-query-data").textContent || '""');
+        const categoryLinks = window.codeMartCategories || [];
+
+        const e = React.createElement;
+
+        function ProductCard(props) {
+            const product = props.product;
+            const lowStock = Number(product.stock) > 0 && Number(product.stock) <= 3;
+            return e("article", { className: "market-card", "data-slug": product.slug }, [
+                e("div", { className: "market-card-top", key: "top" }, [
+                    e("span", { className: "market-type-chip", key: "type" }, product.product_type),
+                    e("span", { className: lowStock ? "market-stock low" : "market-stock", key: "stock" },
+                        Number(product.stock) === 0 ? "Out of stock" : `Stock: ${product.stock}`
+                    ),
+                ]),
+                product.image_url ? e("img", { src: product.image_url, alt: product.name, className: "market-image", key: "img" }) : null,
+                e("a", { href: product.detail_url, className: "market-title", key: "title" }, product.name),
+                e("p", { className: "market-meta", key: "meta" }, `${product.category} | ${product.seller}`),
+                e("p", { className: "market-price", key: "price" }, `Rs. ${product.price}`),
+            ]);
+        }
+
+        function Storefront() {
+            const hero = e("section", { className: "market-hero" }, [
+                e("div", { key: "copy" }, [
+                    e("p", { className: "hero-kicker" }, "Student Commerce Platform"),
+                    e("h1", { className: "hero-title" }, "CodeMart: Buy and Sell Code, Papers, Projects, and Internships"),
+                    e("p", { className: "hero-sub" }, "A focused academic marketplace with buyer, seller, and admin operations."),
+                ]),
+            ]);
+
+            const categories = e(
+                "div",
+                { className: "market-categories" },
+                categoryLinks.map(function (item) {
+                    return e("a", { href: item.url, className: "market-category-link", key: item.url }, item.name);
+                })
+            );
+
+            const queryBanner = searchQuery
+                ? e("p", { className: "market-query" }, `Showing results for: ${searchQuery}`)
+                : null;
+
+            const grid = products.length
+                ? e("div", { className: "market-grid" }, products.map(function (product) {
+                    return e(ProductCard, { product: product, key: product.slug });
+                }))
+                : e("p", { className: "muted" }, "No products found.");
+
+            return e("div", null, [hero, categories, queryBanner, grid]);
+        }
+
+        ReactDOM.createRoot(rootNode).render(e(Storefront));
+
+        const refresh = function () {
+            const cards = rootNode.querySelectorAll("[data-slug]");
+            cards.forEach(async function (card) {
+                const slug = card.getAttribute("data-slug");
+                const stockNode = card.querySelector(".market-stock");
+                const priceNode = card.querySelector(".market-price");
+                if (!slug || !stockNode || !priceNode) {
                     return;
                 }
-                const data = await response.json();
-                priceNode.textContent = data.price;
-                stockNode.textContent = data.stock;
-            } catch (error) {
-                console.debug("Card refresh skipped", error);
-            }
+                try {
+                    const response = await fetch(`/api/products/${slug}/status/`, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+                    if (!response.ok) {
+                        return;
+                    }
+                    const data = await response.json();
+                    stockNode.textContent = Number(data.stock) === 0 ? "Out of stock" : `Stock: ${data.stock}`;
+                    priceNode.textContent = `Rs. ${data.price}`;
+                    stockNode.classList.toggle("low", Number(data.stock) > 0 && Number(data.stock) <= 3);
+                } catch (error) {
+                    console.debug("Live refresh skipped", error);
+                }
+            });
         };
 
-        const runRefresh = () => cards.forEach((card) => refreshCard(card));
-        setInterval(runRefresh, 20000);
+        setInterval(refresh, 15000);
     })();
 </script>
 {% endblock %}
+

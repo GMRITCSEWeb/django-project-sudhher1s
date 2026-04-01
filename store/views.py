@@ -23,6 +23,29 @@ from .forms import (
 from .models import CartItem, Category, Order, OrderItem, Product, UserProfile
 
 
+STUDENT_CATEGORY_NAMES = ["Code", "Papers", "Projects", "Internships"]
+
+
+def ensure_student_categories():
+    for category_name in STUDENT_CATEGORY_NAMES:
+        Category.objects.get_or_create(name=category_name)
+
+
+def serialize_product(product):
+    return {
+        "name": product.name,
+        "slug": product.slug,
+        "description": product.description,
+        "price": str(product.price),
+        "stock": product.stock,
+        "category": product.category.name,
+        "product_type": product.get_product_type_display(),
+        "seller": product.seller.username if product.seller else "Campus Seller",
+        "detail_url": product.get_absolute_url(),
+        "image_url": product.image.url if product.image else "",
+    }
+
+
 def seller_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -49,10 +72,12 @@ class ProductListView(ListView):
         return Product.objects.select_related("category", "seller").filter(is_active=True)
 
     def get_context_data(self, **kwargs):
+        ensure_student_categories()
         context = super().get_context_data(**kwargs)
         context["categories"] = Category.objects.select_related("parent").all()
         context["active_category"] = None
         context["search_query"] = ""
+        context["react_products"] = [serialize_product(product) for product in context["products"]]
         return context
 
 
@@ -74,6 +99,7 @@ class ProductDetailView(DetailView):
 
 
 def category_products(request, slug):
+    ensure_student_categories()
     category = get_object_or_404(Category.objects.select_related("parent"), slug=slug)
     child_ids = category.children.values_list("id", flat=True)
     products = (
@@ -92,11 +118,13 @@ def category_products(request, slug):
             "active_category": category,
             "search_query": "",
             "is_paginated": False,
+            "react_products": [serialize_product(product) for product in products],
         },
     )
 
 
 def search_products(request):
+    ensure_student_categories()
     query = request.GET.get("q", "").strip()
     products = Product.objects.select_related("category", "seller").filter(is_active=True)
     if query:
@@ -115,6 +143,7 @@ def search_products(request):
             "active_category": None,
             "search_query": query,
             "is_paginated": False,
+            "react_products": [serialize_product(product) for product in products],
         },
     )
 
@@ -132,7 +161,7 @@ def register_view(request):
             profile.role = role
             profile.save(update_fields=["role"])
             login(request, user)
-            messages.success(request, "Registration successful. Welcome to ShopKart!")
+            messages.success(request, "Registration successful. Welcome to CodeMart!")
             return redirect("product_list")
     else:
         form = RegisterForm()
@@ -308,6 +337,7 @@ def seller_dashboard(request):
 
 @seller_required
 def seller_product_create(request):
+    ensure_student_categories()
     if request.method == "POST":
         form = SellerProductForm(request.POST, request.FILES)
         if form.is_valid():
@@ -323,6 +353,7 @@ def seller_product_create(request):
 
 @seller_required
 def seller_product_edit(request, slug):
+    ensure_student_categories()
     product = get_object_or_404(Product, slug=slug, seller=request.user)
     if request.method == "POST":
         form = SellerProductForm(request.POST, request.FILES, instance=product)
@@ -390,6 +421,7 @@ def product_status_api(request, slug):
             "name": product.name,
             "price": str(product.price),
             "stock": product.stock,
+            "product_type": product.get_product_type_display(),
             "is_active": product.is_active,
             "updated_at": product.updated_at.isoformat(),
         }

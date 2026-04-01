@@ -1,9 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}Seller Dashboard - ShopKart{% endblock %}
+{% block title %}Seller Dashboard - CodeMart{% endblock %}
 
 {% block content %}
 <h1 class="page-title">Seller Dashboard</h1>
+
+<div class="chip-row">
+    <span class="chip active">Code</span>
+    <span class="chip active">Papers</span>
+    <span class="chip active">Projects</span>
+    <span class="chip active">Internships</span>
+</div>
 
 <div class="seller-stats">
     <article class="card">
@@ -29,6 +36,7 @@
         <tr>
             <th>Name</th>
             <th>Category</th>
+            <th>Type</th>
             <th>Price</th>
             <th>Stock</th>
             <th>Status</th>
@@ -40,6 +48,7 @@
             <tr>
                 <td><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></td>
                 <td>{{ product.category.name }}</td>
+                <td>{{ product.get_product_type_display }}</td>
                 <td>$ {{ product.price }}</td>
                 <td>{{ product.stock }}</td>
                 <td>{% if product.is_active %}Active{% else %}Inactive{% endif %}</td>
@@ -70,3 +79,4 @@
 <p>No sales yet.</p>
 {% endif %}
 {% endblock %}
+

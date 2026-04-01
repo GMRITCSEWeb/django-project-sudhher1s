@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ product.name }} - ShopKart{% endblock %}
+{% block title %}{{ product.name }} - CodeMart{% endblock %}
 
 {% block content %}
 <article class="product-detail">
@@ -9,6 +9,7 @@
     {% endif %}
     <div>
         <h1>{{ product.name }}</h1>
+        <p><span class="chip active">{{ product.get_product_type_display }}</span></p>
         <p class="muted">Category: <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></p>
         <p class="muted">Sold by: {{ product.seller.username|default:'Campus Seller' }}</p>
         <p>{{ product.description }}</p>
@@ -55,3 +56,4 @@
     })();
 </script>
 {% endblock %}
+

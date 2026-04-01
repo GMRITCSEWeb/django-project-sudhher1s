@@ -5,27 +5,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ShopKart{% endblock %}</title>
+    <title>{% block title %}CodeMart{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <header class="site-header">
         <div class="container nav-wrap">
-            <a class="brand" href="{% url 'product_list' %}">ShopKart</a>
+            <a class="brand" href="{% url 'product_list' %}">CodeMart</a>
             <form action="{% url 'search_products' %}" method="get" class="search-form">
                 <input type="text" name="q" placeholder="Search products" value="{{ search_query|default:'' }}">
                 <button type="submit">Search</button>
             </form>
             {% block navbar %}
-            <nav>
+            <nav class="main-nav">
                 <a href="{% url 'product_list' %}">Products</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'cart' %}">Cart</a>
                     <a href="{% url 'buyer_orders' %}">My Orders</a>
-                    {% if user.is_staff %}
-                        <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
-                        <a href="{% url 'admin:index' %}">Django Admin</a>
-                    {% endif %}
                     {% if user.profile.role == 'seller' %}
                         <a href="{% url 'seller_dashboard' %}">Seller Dashboard</a>
                         <a href="{% url 'seller_orders' %}">Seller Orders</a>
@@ -45,7 +44,7 @@
     </header>
 
     <main class="container page-grid">
-        <section>
+        <section class="main-content">
             {% if messages %}
                 <div class="messages">
                     {% for message in messages %}
@@ -55,7 +54,7 @@
             {% endif %}
             {% block content %}{% endblock %}
         </section>
-        <aside>
+        <aside class="right-rail">
             <h3>Top Products</h3>
             {% top_products 5 %}
         </aside>
@@ -64,9 +63,10 @@
     <footer class="site-footer">
         {% block footer %}
         <div class="container">
-            <p>ShopKart - Your Django e-commerce learning project.</p>
+            <p>CodeMart - Student marketplace for code, papers, projects, and internships.</p>
         </div>
         {% endblock %}
     </footer>
 </body>
 </html>
+
